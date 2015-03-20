@@ -10,9 +10,6 @@ exploit mititgations compiled with the binary and each sharedlibrary."""
     def __init__ (self):
       super(GdbChecksecCommand, self).__init__ ("checksec", gdb.COMMAND_USER)
 
-    def get_modules(self):
-      return ["module list here"]
-
     def invoke(self, arg, from_tty):
       mods = get_modules()
 
