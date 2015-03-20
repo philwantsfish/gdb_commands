@@ -4,7 +4,7 @@ import subprocess
 import re
 
 class GdbChecksecCommand (gdb.Command):
-    """A GDB command inspired by checksec.sh. This command will output the 
+    """A GDB command inspired by checksec.sh and PEDA. This command will output the 
 exploit mititgations compiled with the binary and each sharedlibrary."""
 
     def __init__ (self):
