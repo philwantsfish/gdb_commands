@@ -4,6 +4,7 @@ Remember to source the command in your gdbinit file. *source /path/gdb-checksec.
 Type *checksec* to view output.
 Example:
 ```
+  (gdb) source gdb-checksec.py
   (gdb) checksec
   | NX  | PIE | Canary | Relro   | Path      
   | Yes | No  | No     | Partial | /home/pwf/projects/gdb-plugins/hello_world
