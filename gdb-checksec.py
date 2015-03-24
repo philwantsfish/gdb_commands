@@ -39,9 +39,10 @@ class ModuleSecurityAttributesFactory:
     readelf_output = str(subprocess.check_output(["readelf", "-W", "-a", mod_name]))
 
     # Set NX attribute
-    msa.nx = "No"
-    if None != re.search("GNU_STACK", readelf_output):
-      msa.nx = "Yes"
+    msa.nx = "Yes"
+    stack = re.search(r"GNU_STACK\s+(?:0x[a-zA-Z0-9]+\s+){5}(RW)(E?)", readelf_output)
+    if stack == None or stack.group(2) == "E":
+      msa.nx = "No"
   
     # Set PIE attribute
     msa.pie = "No"
