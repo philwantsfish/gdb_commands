@@ -77,7 +77,7 @@ def get_modules():
   
   # Get the sharedlibrarys
   sharedlibrary_output = gdb.execute("info sharedlibrary", False, True)
-  mobjs = re.findall("(0x[a-zA-Z0-9]+)\s+(0x[a-zA-Z0-9]+)\s+(\w+)(\s+\w+)?\s+([^\s]+)", sharedlibrary_output)
+  mobjs = re.findall("(0x[a-zA-Z0-9]+)\s+(0x[a-zA-Z0-9]+)\s+(\w+)(\s+\S+)?\s+([^\s]+)", sharedlibrary_output)
   for m in mobjs:
     mods.append(m[4])
   return mods
