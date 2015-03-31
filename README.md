@@ -21,7 +21,7 @@ Example:
 
 # pattern-create
 
-This command generates the same pattern aa the Metasploit tool pattern_create.rb.
+This command generates an acyclic pattern with a maximum length of 20280. This is the same pattern as the default output from the Metasploit pattern_create.rb tool.
 
 Example:
 ```
