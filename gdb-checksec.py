@@ -19,7 +19,6 @@ exploit mititgations compiled with the binary and each sharedlibrary."""
       msaf = ModuleSecurityAttributesFactory()
       for mod in mods:
         msa = msaf.create(mod)
-        a = msa.attributes()
         print(f.format(*msa.attributes()))
    
 class ModuleSecurityAttributes:
@@ -78,7 +77,7 @@ def get_modules():
   
   # Get the sharedlibrarys
   sharedlibrary_output = gdb.execute("info sharedlibrary", False, True)
-  mobjs = re.findall("(0x[a-zA-Z0-9]+)\s+(0x[a-zA-Z0-9]+)\s+(\w+)(\s+\S+)?\s+([^\s]+)", sharedlibrary_output)
+  mobjs = re.findall("(0x[a-zA-Z0-9]+)\s+(0x[a-zA-Z0-9]+)\s+(\w+)(\s+\(\*\))?\s+([^\s]+)", sharedlibrary_output)
   for m in mobjs:
     mods.append(m[4])
   return mods
