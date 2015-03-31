@@ -12,7 +12,6 @@ A command to create an acyclic pattern. This command generates the same pattern 
       super(GdbPatternCreateCommand, self).__init__ ("pattern_create", gdb.COMMAND_USER)
 
     def invoke(self, arg, from_tty):
-      print("invoking pattern create command")
       print(pattern_create(arg))
 
 def pattern_create_usage():
