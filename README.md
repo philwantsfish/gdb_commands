@@ -1,13 +1,13 @@
 # GDB commands to aid exploit development
 
-Remember to source the command before use eitherin the .gdbinit file or command line.
+Remember to source each command either in the .gdbinit file or command line.
 ```
-  source /path/to/file/gdb-checksec.py
+  source /path/to/file/gdb-command.py
 ```
 
 # checksec:
 
-This will output compiler protections for each loaded binary and sharedlibrary similar to the *checksec.sh* command 
+This command will output the status of mitigations in each loaded binary and sharedlibrary. Similar to the *checksec.sh* script.
 
 Example:
 ```
