@@ -76,7 +76,7 @@ def pattern_offset(arg):
   if re_sequence.match(arg):
     sequence = arg
   if arg in registers():
-    # Get the value of eip and set this to arg. Below we will parse out the sequence from
+    # Get the value of the register and set this to arg. Below we will parse out the sequence from
     # an address format
     command = "i r {:s}".format(arg)
     output = gdb.execute(command, False, True)
@@ -99,18 +99,6 @@ def registers():
   for line in lines:
     registers.append(line.split()[0])
   return registers
-
-def pattern_offset_address(addr):
-  ret = -1
-  full_pattern = pattern_create()
-
-def pattern_offset_sequence(sequence):
-  ret = -1
-  full_pattern = pattern_create()
-  match = re.search(sequence, full_pattern)
-  if match:
-    ret = match.start()
-  return ret 
 
 class GdbFindMSPCommand(gdb.Command):
   """Usage: findmsp
