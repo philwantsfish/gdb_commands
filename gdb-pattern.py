@@ -67,7 +67,7 @@ A command to get the offset of the sequence into the acyclic pattern genereted b
   
 def pattern_offset(arg):
   ret = -1
-  sequence = ""
+  sequence = None
   full_pattern = pattern_create()
   re_sequence = re.compile("[a-zA-Z0-9]{4}")
   re_address = re.compile("0x[a-zA-Z0-9]{8}")
@@ -75,20 +75,30 @@ def pattern_offset(arg):
 
   if re_sequence.match(arg):
     sequence = arg
-  if re_eip.match(arg):
+  if arg in registers():
     # Get the value of eip and set this to arg. Below we will parse out the sequence from
     # an address format
-    output = gdb.execute("info registers eip", False, True)
+    command = "i r {:s}".format(arg)
+    output = gdb.execute(command, False, True)
     arg = output.split()[1]
   if re_address.match(arg):
     # Note: [::-1] reverses the string
     sequence = binascii.unhexlify(arg[2:]).decode("ascii")[::-1]
 
-  match = re.search(sequence, full_pattern)
-  if match:
-    ret = match.start()
+  if sequence != None:
+    match = re.search(sequence, full_pattern)
+    if match:
+      ret = match.start()
 
   return ret 
+
+def registers():
+  output = gdb.execute("i r", False, True)
+  lines = output.splitlines()
+  registers = []
+  for line in lines:
+    registers.append(line.split()[0])
+  return registers
 
 def pattern_offset_address(addr):
   ret = -1
