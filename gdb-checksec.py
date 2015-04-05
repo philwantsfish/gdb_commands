@@ -2,6 +2,7 @@ from __future__ import with_statement
 import gdb
 import subprocess
 import re
+import os
 
 class GdbChecksecCommand (gdb.Command):
     """A GDB command inspired by checksec.sh and PEDA. This command will output the 
@@ -17,9 +18,17 @@ exploit mititgations compiled with the binary and each sharedlibrary."""
       f = "| {0: <3} | {1: <3} | {2: <6} | {3: <7} | {4: <10}"
       print(f.format(*headers))
       msaf = ModuleSecurityAttributesFactory()
+      error_list = []
       for mod in mods:
         msa = msaf.create(mod)
-        print(f.format(*msa.attributes()))
+        if msa != None:
+          print(f.format(*msa.attributes()))
+        else:
+          error_list.append(mod)
+
+      print()
+      for mod in error_list:
+        print("Error: %s does not exist on the local system" % mod)
    
 class ModuleSecurityAttributes:
   def __init__(self, mod_name):
@@ -35,7 +44,11 @@ class ModuleSecurityAttributes:
 class ModuleSecurityAttributesFactory:
   def create(self, mod_name):
     msa = ModuleSecurityAttributes(mod_name)
-    readelf_output = str(subprocess.check_output(["readelf", "-W", "-a", mod_name]))
+    error_list = []
+    if(os.path.isfile(mod_name)):
+      readelf_output = str(subprocess.check_output(["readelf", "-W", "-a", mod_name]))
+    else:
+      return None
 
     # Set NX attribute
     msa.nx = "Yes"
@@ -62,10 +75,6 @@ class ModuleSecurityAttributesFactory:
         
     return msa
 
-def readelf_output(mod_name):
-  readelf_output = subprocess.check_output(["readelf", "-W", "-a", mod_name])
-  return str(readelf_output)
- 
 def get_modules():
   mods = [] 
 
@@ -77,9 +86,10 @@ def get_modules():
   
   # Get the sharedlibrarys
   sharedlibrary_output = gdb.execute("info sharedlibrary", False, True)
-  mobjs = re.findall("(0x[a-zA-Z0-9]+)\s+(0x[a-zA-Z0-9]+)\s+(\w+)(\s+\(\*\))?\s+([^\s]+)", sharedlibrary_output)
+  #mobjs = re.findall("(0x[a-zA-Z0-9]+)\s+(0x[a-zA-Z0-9]+)\s+(\w+)(\s+\(\*\))?\s+([^\s]+)", sharedlibrary_output)
+  mobjs = re.findall("(\/.*)", sharedlibrary_output)
   for m in mobjs:
-    mods.append(m[4])
+    mods.append(m)
   return mods
   
 
