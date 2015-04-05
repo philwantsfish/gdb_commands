@@ -74,7 +74,7 @@ def pattern_offset(arg):
   re_eip = re.compile("eip")
 
   if re_sequence.match(arg):
-    sequnce = arg
+    sequence = arg
   if re_eip.match(arg):
     # Get the value of eip and set this to arg. Below we will parse out the sequence from
     # an address format
