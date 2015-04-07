@@ -100,18 +100,90 @@ def registers():
     registers.append(line.split()[0])
   return registers
 
-class GdbFindMSPCommand(gdb.Command):
-  """Usage: findmsp
+class GdbPatternFindCommand(gdb.Command):
+  """Usage: pattern_find
   
 A command to find all occruances of the acyclic pattern generated from pattern_create."""
 
   def __init__(self):
-    super(GdbFindMSPCommand, self).__init__("findmsp", gdb.COMMAND_USER)
+    super(GdbPatternFindCommand, self).__init__("pattern_find", gdb.COMMAND_USER)
     
   def invoke(self, arg, from_tty):
-    print("test")
+    # We will be changing the "print elements" variable. Store current setting so we can
+    # rever it
+    print_elements = get_option_print_elements()
+    set_option_print_elements(20280)
 
+    # Return an array of results containing : Address, Length, Region
+    results = []
+    seq_start = "0x41306141"
+    full_pattern = pattern_create()
+
+    # Search each region of memory for the start of the pattern
+    mapping = info_mapping()
+    for region in mapping:
+      # Seach for Aa0A in all regions of memory
+      matches = search_region(region, seq_start)
+      if len(matches) > 0:
+        for m in matches:
+          results.append([m, 'unknown', region[4]])
+
+    # Get the length of each pattern
+    for r in results:
+      command = "x/s {:s}".format(r[0])
+      seq = gdb.execute(command, False, True).split()[1][1:-1]
+      pattern_len = 0
+      while(pattern_len < 20280 and full_pattern[pattern_len] == seq[pattern_len]):
+        pattern_len += 1
+      r[1] = pattern_len
+
+    # Restore the "print elements" varaible
+    set_option_print_elements(print_elements) 
+
+
+    # Get the size of the address column
+    address_column_len = 0 
+    for addr in results:
+      if len(addr[0]) > address_column_len:
+        address_column_len = len(addr[0])
+
+    # Print the data
+    f = "| {0: <" + str(address_column_len)  + "} | {1: <6} | {2: <6}"
+    headers = ('Address', 'Length', 'Region')
+    print(f.format(*headers))
+    for r in results:
+      print(f.format(*r))
+
+
+def get_option_print_elements():
+  output = gdb.execute("show print elements", False, True)
+  num = int(output.split()[-1][:-1])
+  return num
+
+def set_option_print_elements(num):
+  command = "set print elements {:d}".format(num)
+  gdb.execute(command, False, True)
+  
+
+# Search memory for a word of data. Returns an array of address that match.
+def search_region(region, data):
+    command = "find /w {:s}, +{:s}, {:s}".format(region[0], region[2], data)
+    output = gdb.execute(command, False, True)
+    numfound = int(gdb.execute("print $numfound", False, True).split()[2])
+    if numfound > 0:
+      return output.splitlines()[:-1] 
+    return []
+
+# This function returns a list of tuples for each region of mapped memory
+# Tuple contains: (start_addr, end_addr, size, offset, objfile)
+# Thought: Should this data be stored in a class with convenience functions?
+def info_mapping():
+  mapping = gdb.execute("info proc mapping", False, True)
+  map_list = []
+  for line in mapping.splitlines()[4:]:
+    map_list.append(line.split())
+  return map_list
 
 GdbPatternCreateCommand()
 GdbPatternOffsetCommand()
-GdbFindMSPCommand()
+GdbPatternFindCommand()
