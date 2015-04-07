@@ -133,7 +133,7 @@ A command to find all occruances of the acyclic pattern generated from pattern_c
       command = "x/s {:s}".format(r[0])
       seq = gdb.execute(command, False, True).split()[1][1:-1]
       pattern_len = 0
-      while(pattern_len < 20280 and full_pattern[pattern_len] == seq[pattern_len]):
+      while(pattern_len < 20280 and pattern_len < len(seq) and full_pattern[pattern_len] == seq[pattern_len]):
         pattern_len += 1
       r[1] = pattern_len
 
