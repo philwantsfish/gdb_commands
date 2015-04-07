@@ -47,3 +47,15 @@ rip            0x30654139	0x30654139
 119
 (gdb)
 ```
+# pattern_find
+
+This commands will find all instances of the pattern in memory. The command will display the location of the pattern, the length, and the type of memory region. The command takes no arguments.
+
+Example:
+
+```
+(gdb) pattern_find 
+| Address        | Length | Region
+| 0x7fffffffe073 | 4      | [stack]
+| 0x7fffffffe082 | 4      | [stack]
+```
