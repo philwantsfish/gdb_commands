@@ -54,8 +54,13 @@ This commands will find all instances of the pattern in memory. The command will
 Example:
 
 ```
+(gdb) r
+Starting program: /home/pwf/projects/gdb-plugins/hello_world Aa0Aa1Aa2Aa3A Aa0Aa1 AAAAA
+
+Breakpoint 1, 0x000000000040052d in main ()
 (gdb) pattern_find 
 | Address        | Length | Region
-| 0x7fffffffe073 | 4      | [stack]
-| 0x7fffffffe082 | 4      | [stack]
+| 0x7fffffffe080 | 13     | [stack]
+| 0x7fffffffe08e | 6      | [stack]
+(gdb)
 ```
