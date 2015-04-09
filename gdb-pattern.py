@@ -83,7 +83,7 @@ def pattern_offset(arg):
     arg = output.split()[1]
   if re_address.match(arg):
     # Note: [::-1] reverses the string
-    sequence = binascii.unhexlify(arg[2:]).decode("ascii")[::-1]
+    sequence = binascii.unhexlify(arg[2:].encode('utf-8')).decode("ascii")[::-1]
 
   if sequence != None:
     match = re.search(sequence, full_pattern)
