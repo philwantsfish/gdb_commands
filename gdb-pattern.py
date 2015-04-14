@@ -85,7 +85,7 @@ def pattern_offset(arg):
   if re_address.match(arg):
     # Note: [::-1] reverses the string, since data is little endian
     try:
-      sequence = binascii.unhexlify(arg[2:]).decode("ascii")[::-1]
+      sequence = binascii.unhexlify(arg[2:].encode('utf-8')).decode("ascii")[::-1]
     except:
       sequence = None
 
