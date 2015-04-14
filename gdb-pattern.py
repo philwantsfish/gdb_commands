@@ -8,7 +8,8 @@ import binascii
 class GdbPatternCreateCommand(gdb.Command):
     """Usage: pattern_create <number>
 
-A command to create an acyclic pattern. This command generates the same pattern as the default Metasploit pattern. This pattern will start repeating after 20280 characters."""
+A command to create an acyclic pattern. This command generates the same pattern as the
+default Metasploit pattern. This pattern will start repeating after 20280 characters."""
 
     def __init__(self):
       super(GdbPatternCreateCommand, self).__init__ ("pattern_create", gdb.COMMAND_USER)
@@ -53,7 +54,8 @@ def pattern_create(size="20280"):
 class GdbPatternOffsetCommand(gdb.Command):
     """Usage: pattern_offset <sequence>
 
-A command to get the offset of the sequence into the acyclic pattern genereted by pattern_create."""
+A command to get the offset of the sequence into the acyclic pattern genereted 
+by pattern_create."""
 
     def __init__(self):
       super(GdbPatternOffsetCommand, self).__init__ ("pattern_offset", gdb.COMMAND_USER)
@@ -71,19 +73,21 @@ def pattern_offset(arg):
   full_pattern = pattern_create()
   re_sequence = re.compile("[a-zA-Z0-9]{4}")
   re_address = re.compile("0x[a-zA-Z0-9]{8}")
-  re_eip = re.compile("eip")
 
   if re_sequence.match(arg):
     sequence = arg
   if arg in registers():
-    # Get the value of the register and set this to arg. Below we will parse out the sequence from
-    # an address format
+    # Get the value of the register and set this to arg. Below we will parse out 
+    #the sequence from an address format
     command = "i r {:s}".format(arg)
     output = gdb.execute(command, False, True)
     arg = output.split()[1]
   if re_address.match(arg):
-    # Note: [::-1] reverses the string
-    sequence = binascii.unhexlify(arg[2:]).decode("ascii")[::-1]
+    # Note: [::-1] reverses the string, since data is little endian
+    try:
+      sequence = binascii.unhexlify(arg[2:]).decode("ascii")[::-1]
+    except:
+      sequence = None
 
   if sequence != None:
     match = re.search(sequence, full_pattern)
@@ -100,10 +104,28 @@ def registers():
     registers.append(line.split()[0])
   return registers
 
+def register_value(reg):
+    data = gdb.execute("i r {:s}".format(reg), False, True).split()[1]
+    return data
+
+def register_ptr(reg):
+    data = None
+    try:
+      command = "x/1wx ${:s}".format(reg)
+      data = gdb.execute(command, False, True)
+      data = data.split(':')[1].strip()
+    except:
+      data = None
+    return data
+  
+
 class GdbPatternFindCommand(gdb.Command):
   """Usage: pattern_find
   
-A command to find all occruances of the acyclic pattern generated from pattern_create."""
+A command to find all occruances of the acyclic pattern generated from pattern_create.
+This searches the memory space of the process and outputs the length of each pattern found
+. The value of each register and the value pointed to by each register is also searched.
+The length column for these represents an offset into a pattern."""
 
   def __init__(self):
     super(GdbPatternFindCommand, self).__init__("pattern_find", gdb.COMMAND_USER)
@@ -137,8 +159,22 @@ A command to find all occruances of the acyclic pattern generated from pattern_c
         pattern_len += 1
       r[1] = pattern_len
 
-    # Restore the "print elements" varaible
+    # Restore the "print elements" variable
     set_option_print_elements(print_elements) 
+    
+    # Check if any of the registers contain pattern data
+    for reg in registers():
+      data = register_value(reg)
+      offset = pattern_offset(data)
+      if offset != -1:
+        results.append(["Register", offset, reg])
+
+      # Check if any of the registers point to pattern data
+      ptr_data = register_ptr(reg)
+      if ptr_data != None:
+        offset = pattern_offset(ptr_data)
+        if offset != -1:
+          results.append(["Pointer", offset, reg])
 
 
     # Get the size of the address column
@@ -146,13 +182,18 @@ A command to find all occruances of the acyclic pattern generated from pattern_c
     for addr in results:
       if len(addr[0]) > address_column_len:
         address_column_len = len(addr[0])
+    if address_column_len < len("Location"):
+      address_column_len = len("Location")
 
     # Print the data
     f = "| {0: <" + str(address_column_len)  + "} | {1: <6} | {2: <6}"
-    headers = ('Address', 'Length', 'Region')
+    headers = ('Location', 'Length', 'Region')
     print(f.format(*headers))
     for r in results:
       print(f.format(*r))
+    
+    if len(results) == 0:
+      print("None found.")
 
 
 def get_option_print_elements():
