@@ -49,18 +49,20 @@ rip            0x30654139	0x30654139
 ```
 # pattern_find
 
-This commands will find all instances of the pattern in memory. The command will display the location of the pattern, the length, and the type of memory region. The command takes no arguments.
+This commands will find all instances of the pattern in memory. The command will display the location of the pattern, the length, and the type of memory region. This command also searches the values in registers and the values pointer to by registers, the length column for this output represents an offset into a pattern. The command takes no arguments.
 
 Example:
 
 ```
 (gdb) r
 Starting program: /home/pwf/projects/gdb-plugins/hello_world Aa0Aa1Aa2Aa3A Aa0Aa1 AAAAA
-
+...snip....
 Breakpoint 1, 0x000000000040052d in main ()
 (gdb) pattern_find 
 | Address        | Length | Region
 | 0x7fffffffe080 | 13     | [stack]
 | 0x7fffffffe08e | 6      | [stack]
+| Register       | 0      | rax   
+| Pointer        | 0      | r13
 (gdb)
 ```
