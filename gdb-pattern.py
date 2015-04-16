@@ -90,7 +90,7 @@ def pattern_offset(arg):
       sequence = None
 
   if sequence != None:
-    match = re.search(sequence, full_pattern)
+    match = re.search(re.escape(sequence), full_pattern)
     if match:
       ret = match.start()
 
